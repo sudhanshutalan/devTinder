@@ -7,11 +7,4 @@ const connectDB = async () => {
   );
 };
 
-// calling connectDB function and handling promises
-connectDB()
-  .then(() => {
-    console.log("Connection successful");
-  })
-  .catch((err) => {
-    console.error("Connection unsuccessful. Some error occured....");
-  });
+module.exports = connectDB;
