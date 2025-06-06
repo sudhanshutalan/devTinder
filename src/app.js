@@ -24,6 +24,60 @@ app.post("/signup", async (req, res) => {
   }
 });
 
+//creating feed api -- getting all users
+app.get("/feed", async (req, res) => {
+  try {
+    const users = await User.find({});
+    res.send(users);
+  } catch (err) {
+    res.status(401).send("Something went wrong...");
+  }
+});
+
+//finding user by id
+app.get("/findbyid", async (req, res) => {
+  const id = req.body.id;
+  try {
+    const user = await User.findById(id);
+    res.send(user);
+  } catch (err) {
+    res.status(401).send("Something went wrong");
+  }
+});
+
+//deleting use by Id
+app.delete("/deletebyid", async (req, res) => {
+  const userId = req.body.userId;
+  try {
+    const user = await User.findByIdAndDelete(userId);
+    res.send(user + "\n\nUser deleted successfully");
+  } catch (err) {
+    res.status(401).send("Something went wrong..." + err);
+  }
+});
+
+//update user by Id
+app.patch("/updateuser/:id", async (req, res) => {
+  const id = req.params?.id;
+  const data = req.body;
+  try {
+    const allowedUpdates = ["gender", "age", "skills"];
+    const isUpdateallowed = Object.keys(data).every((k) =>
+      allowedUpdates.includes(k)
+    );
+    if (!isUpdateallowed) {
+      throw new Error("Update not allowed");
+    }
+    if (data?.skills.length > 10) {
+      throw new Error("Skills cannot be more than 10");
+    }
+    const updatedUser = await User.findByIdAndUpdate(id, data);
+    res.send("Updated user data");
+  } catch (err) {
+    res.status(401).send("Something went wrong");
+  }
+});
+
 // calling connectDB function and handling promises
 connectDB()
   .then(() => {
