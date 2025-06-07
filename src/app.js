@@ -1,6 +1,8 @@
 const express = require("express");
+const bcrypt = require("bcrypt");
 const connectDB = require("./config/database.js");
 const User = require("./models/user.js");
+const { validateSignupData } = require("./utils/validation.js");
 
 const app = express();
 const port = 3000;
@@ -8,19 +10,58 @@ const port = 3000;
 app.use(express.json());
 
 app.post("/signup", async (req, res) => {
-  // console.log(req.body);
-
-  // creating a new instance of the user model
-  const user = new User(req.body);
-
-  // creating a instance of user model
-  // const user = new User(userObj)
-
   try {
+    // validating of data
+    validateSignupData(req);
+
+    // extracting data from req.body
+    const { firstName, lastName, emailID, password, gender, age } = req.body;
+
+    // encrypting the password
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    // creating a new instance of the user model
+    // const user = new User(req.body);
+
+    // better way of declaring data for signup api. only declaring selected fields
+    const user = new User({
+      firstName,
+      lastName,
+      emailID,
+      password: passwordHash,
+      gender,
+      age,
+    });
+
     await user.save();
     res.send("User added successfully");
   } catch (err) {
-    res.status(400).send("Error saving the user :" + err.message);
+    res.status(400).send("Error  :" + err.message);
+  }
+});
+
+// creating login api
+app.post("/login", async (req, res) => {
+  try {
+    // get login data of the user
+    const { emailID, password } = req.body;
+
+    // checking user email exists in database or not
+    const user = await User.findOne({ emailID: emailID });
+    if (!user) {
+      throw new Error("Email doesnot exists!");
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (isPasswordValid) {
+      res.status(200).send("Login successful");
+    } else {
+      //res.status(401).send("Invalid credentials");
+      throw new Error("Invalid credentials");
+    }
+  } catch (err) {
+    res.status(400).send("Error: " + err);
   }
 });
 

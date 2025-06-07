@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const validator = require("validator");
+// const validator = require("validator");
 
 const userSchema = mongoose.Schema(
   {
@@ -9,7 +9,7 @@ const userSchema = mongoose.Schema(
       minLength: 4, // setting a minimum length
       maxLength: 50, // setting a maximum
     },
-    LastName: {
+    lastName: {
       type: String,
     },
     emailID: {
@@ -18,14 +18,17 @@ const userSchema = mongoose.Schema(
       lowercase: true, // make all letters in lowercase
       trim: true, // remove whitespace from front and rear
       unique: true, // make the field unique prevents duplicate entry
-      validate(value) {
-        if (!validator.isEmail(value)) {
-          throw new Error("Invalid Email address " + value);
-        }
-      },
+
+      // email validation function (now in utils)
+      // validate(value) {
+      //   if (!validator.isEmail(value)) {
+      //     throw new Error("Invalid Email address " + value);
+      //   }
+      // },
     },
     password: {
       type: String,
+      required: true,
     },
     age: {
       type: Number,
